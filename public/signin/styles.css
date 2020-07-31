@@ -1,0 +1,45 @@
+body{
+    background-color: #21242c;
+    background-image: -webkit-linear-gradient(65deg, #E4E9FD 50%, #21242c 50%);
+    height: 1000px;
+
+}
+
+html{
+    text-align: center;
+    height: min-content !important;
+}
+
+h1{
+    color: blanchedalmond;
+    margin-top: 150px !important;
+    text-align: center;
+    
+}
+h3{
+    color: blanchedalmond;
+}
+.signin-box{
+    width: min-content;
+    height: 300px;
+    width: 700px;
+    text-align: center;
+    border-radius: 5px;
+    opacity: .9;
+    margin: 70px auto;
+
+}
+.btn{
+text-align: center;
+display: grid;
+
+width: 250px;
+margin-top: 100px;
+
+
+    
+}
+.wrapper{
+    text-align: center;
+    
+}
