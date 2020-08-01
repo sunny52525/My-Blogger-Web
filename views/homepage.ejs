@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Fonts and bootstrap -->
+    <%- include("partials/fonts_boot"); -%>
+    <link rel="stylesheet" href="/public/homepage/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogs</title>
+</head>
+
+<body>
+    <%- include("partials/navbar"); -%>
+
+
+    <div class="title-box">
+        <h2 class="title">
+            Read what other Users are Writing.
+        </h2>
+    </div>
+
+    <div class="posts">
+        
+        <% post.forEach(function(post){ %>
+
+            <h3 class="each-title"><%=post.title%></h3>
+             
+                <%-post.content.substring(0,300) + "......"%>
+                
+                <p class="para"> 
+                <a href="/posts/<%=post.id%>">Read more</a>
+            </p>
+
+            <div class="line"></div>
+
+<%        }) %>
+
+
+    </div>
+
+
+    <script src="/public/homepage/index.js"></script>
+</body>
+
+</html>

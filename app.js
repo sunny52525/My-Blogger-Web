@@ -79,7 +79,31 @@ app.get('/sessionLogin', (req, res) => {
 });
 
 
+app.get("/home",checkCookieMiddleware,(req,res) =>{
+var avatar="https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
+   
 
+    var posts=[];
+    let postRef=db.ref("posts");
+    postRef.once("value",snap =>{
+
+        snap.forEach(function(item) {
+            var itemVal = item.val();
+            // console.log(item.val());
+            posts.push(itemVal);
+        });
+        
+    // console.log(posts);
+
+    res.render('homepage',{
+        profileImg: avatar,
+        post:posts.reverse()
+    });
+
+    });
+
+
+});
 
 
 app.post("/posts/", function (req, res) {
