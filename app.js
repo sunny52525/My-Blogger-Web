@@ -171,7 +171,7 @@ function setCookie(idToken, res) {
 		res.cookie('__session', sessionCookie, options);
 		
 		admin.auth().verifyIdToken(idToken).then(function(decodedClaims) {
-			res.redirect('/');
+			res.redirect('/home');
 		});
 			
 	}, error => {
