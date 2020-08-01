@@ -37,7 +37,7 @@ var uiConfig = {
           // User successfully signed in.
 
           user.getIdToken().then(function(idToken) {
-                console.log(idToken);
+
               window.location.href = '/sessionLogin?idToken=' + idToken;
           }).catch(error => {
               alert(error);

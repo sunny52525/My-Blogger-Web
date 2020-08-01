@@ -1,7 +1,7 @@
 body{
     background-color: #21242c;
     background-image: -webkit-linear-gradient(65deg, #E4E9FD 50%, #21242c 50%);
-    height: 1000px;
+    height: 1100px;
 
 }
 
@@ -11,9 +11,11 @@ html{
 }
 
 h1{
-    color: blanchedalmond;
+    font-family: 'Recursive', sans-serif;
+    color: cornsilk;
     margin-top: 150px !important;
     text-align: center;
+    margin-bottom: 30px !important;
     
 }
 h3{
@@ -42,4 +44,13 @@ margin-top: 100px;
 .wrapper{
     text-align: center;
     
+}
+
+.firebaseui-provider-sign-in-footer>.firebaseui-tos {
+    color: floralwhite !important;
+}
+
+.navbar-brand{
+
+    font-family: 'Rowdies', cursive;
 }

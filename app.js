@@ -69,11 +69,6 @@ app.get("/posts/:postId", function (req, res) {
 });
 
 
-app.get("/signin", function (req, res) {
-
-    res.sendFile(__dirname + "/views/signin.html")
-});
-
 app.get('/sessionLogin', (req, res) => {
     const idToken = req.query.idToken;
     console.log("****************");
@@ -100,6 +95,15 @@ app.post("/posts/", function (req, res) {
         console.log(err);
     });
 });
+
+
+
+app.get("/signin",function (req, res) {
+
+    
+    res.render('signin');
+});
+
 
 app.get('/', checkCookieMiddleware, (req, res) => {
     let uid =  req.decodedClaims.uid;
