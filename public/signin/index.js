@@ -37,10 +37,12 @@ var uiConfig = {
           // User successfully signed in.
 
           user.getIdToken().then(function(idToken) {
+                console.log(idToken);
               window.location.href = '/sessionLogin?idToken=' + idToken;
           }).catch(error => {
               alert(error);
-          }) 
+              console.log(error);
+          }) ;
 
       }
   }
@@ -51,24 +53,3 @@ var ui = new firebaseui.auth.AuthUI(firebase.auth());
 
 // The start method will wait until the DOM is loaded.
 ui.start('#firebaseui-auth-container', uiConfig);
-
-
-firebase.auth().onAuthStateChanged(function (user) {
-
-  if (user) {
-    var displayName = user.displayName;
-    var email = user.email;
-    var emailVerified = user.emailVerified;
-    var photoURL = user.photoURL;
-    var isAnonymous = user.isAnonymous;
-    var uid = user.uid;
-    var providerData = user.providerData;
-
-    console.log(displayName);
-    console.log(user.uid);
-    window.location.href='/';
-  } else {
-
-  }
-
-});

@@ -6,6 +6,10 @@ const ejs = require("ejs");
 const admin = require("firebase-admin");
 const app = express();
 const cookieParser = require("cookie-parser");
+const appHost = require("https-localhost")();
+// intialise the express app
+const https = require('https');
+const fs = require('fs');
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -71,14 +75,9 @@ app.get("/signin", function (req, res) {
 });
 
 app.get('/sessionLogin', (req, res) => {
-
     const idToken = req.query.idToken;
-
     console.log("****************");
     console.log(idToken);
-
-
-
     console.log("*****************88");
 
     setCookie(idToken, res);
@@ -102,12 +101,12 @@ app.post("/posts/", function (req, res) {
     });
 });
 
-
-
-
-app.get("/", function (req, res) {
+app.get('/', checkCookieMiddleware, (req, res) => {
+    let uid =  req.decodedClaims.uid;
+    console.log("uid is "+ uid);
     res.sendFile(__dirname + "/views/index.html")
 });
+
 let port = process.env.PORT;
 if (port == null || port == "") {
     port = 3000;
@@ -115,9 +114,18 @@ if (port == null || port == "") {
 app.get('*', function (req, res) {
     res.sendFile(__dirname + "/views/404.html");
 });
-app.listen(port, function () {
-    console.log("Server started on port on " + port);
-});
+
+
+https.createServer({
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
+  }, app)
+  .listen(port, function () {
+    console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/')
+  });
+
+
+
 
 function setCookie(idToken, res) {
 	// Set session expiration to 5 days.
@@ -131,17 +139,17 @@ function setCookie(idToken, res) {
 		const options = {maxAge: expiresIn, httpOnly: true, secure: true};
 		res.cookie('__session', sessionCookie, options);
 		
-		admin.auth().verifyIdToken(idToken).then(function(decodedToken) {
-            let uid =decodedToken.uid;
-            res.redirect("/");
-            console.log("uid is "+uid);
+		admin.auth().verifyIdToken(idToken).then(function(decodedClaims) {
+			res.redirect('/');
 		});
 			
 	}, error => {
-        console.log(error);
 		res.status(401).send('UNAUTHORIZED REQUEST!');
 	});
 }
+
+
+// middleware to check cookie
 function checkCookieMiddleware(req, res, next) {
 
 	const sessionCookie = req.cookies.__session || '';
@@ -152,6 +160,7 @@ function checkCookieMiddleware(req, res, next) {
 			next();
 		})
 		.catch(error => {
+            console.log(error);
 			// Session cookie is unavailable or invalid. Force user to login.
 			res.redirect('/signin');
 		});
