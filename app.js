@@ -90,9 +90,7 @@ app.get("/home", checkCookieMiddleware, (req, res) => {
 
 
         snap.forEach(function (item) {
-            if (count == 13) {
-               return;
-            }
+            
             var itemVal = item.val();
             count++;
             if (itemVal.postCover == null) {
@@ -108,7 +106,7 @@ app.get("/home", checkCookieMiddleware, (req, res) => {
 
         res.render('homepage', {
             profileImg: avatar,
-            post: posts.reverse().slice(0, 12)
+            post: posts.reverse()
         });
 
     });
