@@ -89,6 +89,10 @@ var avatar="https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot
 
         snap.forEach(function(item) {
             var itemVal = item.val();
+            if (itemVal.postCover==null) {
+                itemVal.postCover="https://picsum.photos/1600/900"
+                
+            }
             // console.log(item.val());
             posts.push(itemVal);
         });
@@ -97,7 +101,7 @@ var avatar="https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot
 
     res.render('homepage',{
         profileImg: avatar,
-        post:posts.reverse()
+        post:posts.reverse().slice(0,12)
     });
 
     });
@@ -144,18 +148,18 @@ app.get('*', function (req, res) {
 });
 
 
-// https.createServer({
-//     key: fs.readFileSync('server.key'),
-//     cert: fs.readFileSync('server.cert')
-//   }, app)
-//   .listen(port, function () {
-//     console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/')
-//   });
-
-
-app.listen(port, function() {
-    console.log("Server started on port" +port);
+https.createServer({
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
+  }, app)
+  .listen(port, function () {
+    console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/')
   });
+
+
+// app.listen(port, function() {
+//     console.log("Server started on port" +port);
+//   });
   
 
 function setCookie(idToken, res) {

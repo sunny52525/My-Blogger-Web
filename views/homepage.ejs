@@ -4,6 +4,11 @@
 <head>
     <!-- Fonts and bootstrap -->
     <%- include("partials/fonts_boot"); -%>
+
+
+
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/1.0.1/tailwind.min.css">
     <link rel="stylesheet" href="/public/homepage/styles.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,9 +16,9 @@
 </head>
 
 <body>
-    <%- include("partials/navbar"); -%>
+    <%- include("partials/navbar"); %>
 
-
+    <!-- 
     <div class="title-box">
         <h2 class="title">
             Read what other Users are Writing.
@@ -37,8 +42,37 @@
 <%        }) %>
 
 
-    </div>
+    </div> -->
+    <div class="row">
+        <% post.forEach(function(post){ %>
 
+        <div class="posts col-sm-4 " onclick="location.href='posts/<%=post.id%>';">
+            <div class="flex justify-center items-center h-screen title-box">
+                <div class="max-w-sm rounded overflow-hidden shadow-lg">
+
+                        <img class="w-full" src=<%=post.postCover%> >
+                     
+                      
+                      
+                    <div class="px-6 py-4">
+                        <a href=<%= "https://localhost:3000/posts/" + post.id%> >
+                            <div class="font-bold text-xl mb-2"><%=post.title%></div>
+                        </a>
+                        <%-post.content.substring(0,300) + "......"%>
+
+                    </div>
+                    <div class="px-6 py-4">
+                        <span
+                            class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">
+                           <%=post.username%>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%        }) %>
+    </div>
 
     <script src="/public/homepage/index.js"></script>
 </body>
