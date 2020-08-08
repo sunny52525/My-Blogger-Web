@@ -158,18 +158,18 @@ app.get('*', function (req, res) {
 });
 
 
-// https.createServer({
-//     key: fs.readFileSync('server.key'),
-//     cert: fs.readFileSync('server.cert')
-//   }, app)
-//   .listen(port, function () {
-//     console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/');
-//   });
+https.createServer({
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
+  }, app)
+  .listen(port, function () {
+    console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/');
+  });
 
 
-app.listen(port, function () {
-    console.log("Server started on port" + port);
-});
+// app.listen(port, function () {
+//     console.log("Server started on port" + port);
+// });
 
 
 function setCookie(idToken, res) {
