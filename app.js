@@ -79,30 +79,37 @@ app.get('/sessionLogin', (req, res) => {
 });
 
 
-app.get("/home",checkCookieMiddleware,(req,res) =>{
-var avatar="https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
-   
+app.get("/home", checkCookieMiddleware, (req, res) => {
+    var avatar = "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
 
-    var posts=[];
-    let postRef=db.ref("posts");
-    postRef.once("value",snap =>{
 
-        snap.forEach(function(item) {
+    var posts = [];
+    let postRef = db.ref("posts");
+    postRef.once("value", snap => {
+        var count = 0;
+
+
+        snap.forEach(function (item) {
+            if (count == 13) {
+               return;
+            }
             var itemVal = item.val();
-            if (itemVal.postCover==null) {
-                itemVal.postCover="https://picsum.photos/1600/900"
-                
+            count++;
+            if (itemVal.postCover == null) {
+                itemVal.postCover = "https://picsum.photos/1600/900"
+
             }
             // console.log(item.val());
             posts.push(itemVal);
-        });
-        
-    // console.log(posts);
 
-    res.render('homepage',{
-        profileImg: avatar,
-        post:posts.reverse().slice(0,12)
-    });
+        });
+
+        // console.log(posts);
+
+        res.render('homepage', {
+            profileImg: avatar,
+            post: posts.reverse().slice(0, 12)
+        });
 
     });
 
@@ -124,18 +131,21 @@ app.post("/posts/", function (req, res) {
     });
 });
 
+app.get('/signout',(req,res)=>{
+    res.clearCookie('__session');
+    res.redirect('/');
+});
+
+app.get("/signin", function (req, res) {
 
 
-app.get("/signin",function (req, res) {
-
-    
     res.render('signin');
 });
 
 
 app.get('/', checkCookieMiddleware, (req, res) => {
-    let uid =  req.decodedClaims.uid;
-    console.log("uid is "+ uid);
+    let uid = req.decodedClaims.uid;
+    console.log("uid is " + uid);
     res.sendFile(__dirname + "/views/index.html")
 });
 
@@ -157,46 +167,46 @@ app.get('*', function (req, res) {
 //   });
 
 
-app.listen(port, function() {
-    console.log("Server started on port" +port);
-  });
-  
+app.listen(port, function () {
+    console.log("Server started on port" + port);
+});
+
 
 function setCookie(idToken, res) {
-	// Set session expiration to 5 days.
-	// Create the session cookie. This will also verify the ID token in the process.
-	// The session cookie will have the same claims as the ID token.
-	
-	const expiresIn = 60 * 60 * 24 * 5 * 1000;
-	admin.auth().createSessionCookie(idToken, {expiresIn}).then((sessionCookie) => {
-		
-		// Set cookie policy for session cookie and set in response.
-		const options = {maxAge: expiresIn, httpOnly: true, secure: true};
-		res.cookie('__session', sessionCookie, options);
-		
-		admin.auth().verifyIdToken(idToken).then(function(decodedClaims) {
-			res.redirect('/home');
-		});
-			
-	}, error => {
-		res.status(401).send('UNAUTHORIZED REQUEST!');
-	});
+    // Set session expiration to 5 days.
+    // Create the session cookie. This will also verify the ID token in the process.
+    // The session cookie will have the same claims as the ID token.
+
+    const expiresIn = 60 * 60 * 24 * 5 * 1000;
+    admin.auth().createSessionCookie(idToken, { expiresIn }).then((sessionCookie) => {
+
+        // Set cookie policy for session cookie and set in response.
+        const options = { maxAge: expiresIn, httpOnly: true, secure: true };
+        res.cookie('__session', sessionCookie, options);
+
+        admin.auth().verifyIdToken(idToken).then(function (decodedClaims) {
+            res.redirect('/home');
+        });
+
+    }, error => {
+        res.status(401).send('UNAUTHORIZED REQUEST!');
+    });
 }
 
 
 // middleware to check cookie
 function checkCookieMiddleware(req, res, next) {
 
-	const sessionCookie = req.cookies.__session || '';
+    const sessionCookie = req.cookies.__session || '';
 
-	admin.auth().verifySessionCookie(
-		sessionCookie, true).then((decodedClaims) => {
-			req.decodedClaims = decodedClaims;
-			next();
-		})
-		.catch(error => {
+    admin.auth().verifySessionCookie(
+        sessionCookie, true).then((decodedClaims) => {
+            req.decodedClaims = decodedClaims;
+            next();
+        })
+        .catch(error => {
             console.log(error);
-			// Session cookie is unavailable or invalid. Force user to login.
-			res.redirect('/signin');
-		});
+            // Session cookie is unavailable or invalid. Force user to login.
+            res.redirect('/signin');
+        });
 }
