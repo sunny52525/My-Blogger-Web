@@ -84,15 +84,14 @@ app.get("/home", checkCookieMiddleware, (req, res) => {
 
 
     var posts = [];
-    let postRef = db.ref("posts");
+    let postRef = db.ref("posts").limitToLast(50);
     postRef.once("value", snap => {
-        var count = 0;
 
 
         snap.forEach(function (item) {
             
             var itemVal = item.val();
-            count++;
+         
             if (itemVal.postCover == null) {
                 itemVal.postCover = "https://picsum.photos/1600/900"
 
@@ -106,7 +105,7 @@ app.get("/home", checkCookieMiddleware, (req, res) => {
 
         res.render('homepage', {
             profileImg: avatar,
-            post: posts.reverse()
+            post: posts
         });
 
     });
@@ -194,16 +193,17 @@ function uploadPost(postTitle,postContent,uid,userData,id){
     
  
     var postData={
-        content:postContent,
+        content:"<body>" + postContent.replace(/^ {4}/gm, '') +"</body>",
         id:id,
         like_count:0,
         nameOP:userData.name,
         time: new Date().toLocaleString(),
-        title:postTitle,
+        title:postTitle.replace(/^ {4}/gm, ''),
         username:userData.username
     };
     var updates = {};
     updates['/posts/' + id] = postData;
+    updates['user-posts/' + uid + '/' +id]=postData;
     return db.ref().update(updates);
 
 }

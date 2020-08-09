@@ -98,7 +98,15 @@
 .img {
     padding-top: 10px;
 }
-
+.ok{
+    margin-bottom: 20px;
+    height: 200px;
+    overflow: hidden;
+}
+.notOk{
+    position: relative !important;
+    display: inline-block;
+}
 
 .title{
     text-align: left;
