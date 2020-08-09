@@ -35,7 +35,7 @@ admin.initializeApp({
 });
 
 var db = admin.database();
-
+// var database = firebase.database();
 app.get("/posts/:postId", function (req, res) {
     // console.log(req.params);
     var postid = req.params.postId;
@@ -140,6 +140,14 @@ app.get("/signin", function (req, res) {
     res.render('signin');
 });
 
+app.get('/newpost',checkCookieMiddleware,(req,res) =>{
+    var avatar = "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
+
+  res.render('newpost',{
+    profileImg: avatar
+  });
+});
+
 
 app.get('/', checkCookieMiddleware, (req, res) => {
     let uid = req.decodedClaims.uid;
@@ -156,18 +164,71 @@ app.get('*', function (req, res) {
 });
 
 
-// https.createServer({
-//     key: fs.readFileSync('server.key'),
-//     cert: fs.readFileSync('server.cert')
-//   }, app)
-//   .listen(port, function () {
-//     console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/');
-//   });
 
 
-app.listen(port, function () {
-    console.log("Server started on port" + port);
+
+app.post('/newpost',checkCookieMiddleware,(req,res)=>{
+    let postTitle=req.body.posttitle;
+    let postContent=req.body.postcontent;
+    // console.log(req.body.posttitle);
+    let uid = req.decodedClaims.uid;
+  
+    var userRef=db.ref("Users").child(uid);
+    var userData;
+    
+    let id= db.ref().child("posts").push().key;
+    userRef.on("value",snap=>{
+         userData=snap.val();
+        console.log(snap.val()); 
+        uploadPost(postTitle,postContent,uid ,userData,id);
+    });
+   
+    res.redirect('/home');
 });
+
+
+
+
+function uploadPost(postTitle,postContent,uid,userData,id){
+    //content id like_count nameOP time title username
+    
+ 
+    var postData={
+        content:postContent,
+        id:id,
+        like_count:0,
+        nameOP:userData.name,
+        time: new Date().toLocaleString(),
+        title:postTitle,
+        username:userData.username
+    };
+    var updates = {};
+    updates['/posts/' + id] = postData;
+    return db.ref().update(updates);
+
+}
+
+
+
+
+
+
+
+
+
+
+https.createServer({
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
+  }, app)
+  .listen(port, function () {
+    console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/');
+  });
+
+
+// app.listen(port, function () {
+//     console.log("Server started on port" + port);
+// });
 
 
 function setCookie(idToken, res) {
