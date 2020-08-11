@@ -1,5 +1,6 @@
 #editor {
     max-width: 100%;
+
     margin:10px 40px 40px 40px !important;
 }
 .header{
@@ -16,9 +17,22 @@ h1{
     margin-right: 40px;
 }
 #title-post-textarea{
+    resize: none;
+    padding-left: 10px;
+    padding-bottom: 10px;
     width: 100% !important;
 }
 .btn{
     text-align: end;
     margin: 10px auto auto auto;
 }
+.tox{
+    height: 500px !important;
+}
+.tinymce{
+    margin-left: 50px !important;
+}
+.editor::-webkit-input-placeholder {padding-top: 10px;}
+.editor:-moz-placeholder { /* Firefox 18- */padding-top: 10px;}
+.editor::-moz-placeholder {  /* Firefox 19+ */padding-top: 10px;}
+.editor:-ms-input-placeholder {padding-top: 10px;}

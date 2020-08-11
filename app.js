@@ -6,15 +6,22 @@ const ejs = require("ejs");
 const admin = require("firebase-admin");
 const app = express();
 const cookieParser = require("cookie-parser");
+const path = require('path');
+const {Storage} = require('@google-cloud/storage');
+
 const appHost = require("https-localhost")();
 // intialise the express app
 const https = require('https');
 const fs = require('fs');
-
+var fileUpload = require('express-fileupload');
 app.set('view engine', 'ejs');
+
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(__dirname));
 app.use(cookieParser());
+var mime = require('mime');
+app.use(fileUpload({}));
 if (typeof process.env.PRIVATE_KEY !== 'string') {
     console.log(process.env.PRIVATE_KEY);
 } else {
@@ -29,6 +36,7 @@ admin.initializeApp({
 
     }
     ),
+    storageBucket:"gs://my-blogger-1b264.appspot.com",
     databaseURL: "https://my-blogger-1b264.firebaseio.com",
     authDomain: "my-blogger-1b264.firebaseapp.com"
 
@@ -40,6 +48,15 @@ app.get("/posts/:postId", function (req, res) {
     // console.log(req.params);
     var postid = req.params.postId;
     console.log(postid);
+  
+    var regex=/^[^~.!@#$]+$/;
+    if(regex.test(postid))
+{
+   
+}else{
+   res.redirect('/posts/notfound')
+}
+
     var postRef = db.ref("posts").child(postid);
 
     postRef.on("value", snap => {
@@ -119,6 +136,7 @@ app.post("/posts/", function (req, res) {
     // console.log("***************8");
     // console.log(req.body.token);
     var token = (req.body.token);
+
     admin.auth().verifyIdToken(token).then(function (decodedToken) {
         let uid = decodedToken.uid;
         res.redirect("/");
@@ -127,6 +145,45 @@ app.post("/posts/", function (req, res) {
         console.log(err);
     });
 });
+
+
+app.post('/upload-image',(req,res)=>{
+    console.log(req.files.file.name);
+const options = {
+    action: 'read',
+    expires: '03-17-2025'
+};
+var data=req.files.file.data;
+
+    const bucket = admin.storage().bucket();
+    var imageBuffer = new Uint8Array(data);
+    var file = bucket.file(Date.now().toString());
+   console.log(Date.now());
+    file.save(imageBuffer, {
+              metadata: { contentType: 'image/png' },
+              }, 
+              ((error) => {
+                    
+              if (error) {
+                  console.log("++++++++++++++++++++++");
+                 console.log(error);
+                 res.send(error);
+              }
+           file.getSignedUrl(options)
+           .then(results => {
+               const url = results[0];
+                  
+      res.send({ 'location': url});
+               console.log(`The signed url for "fi" is ${url}.`);
+           });
+    }));
+ 
+});
+
+
+
+
+
 
 app.get('/signout',(req,res)=>{
     res.clearCookie('__session');
@@ -213,8 +270,9 @@ function uploadPost(postTitle,postContent,uid,userData,id){
 
 
 
-
-
+function isValid(str){
+    return !/[~`!#$%\^&*+=\\[\]\\';,/{}|\\":<>\?]/g.test(str);
+   }
 
 
 https.createServer({
