@@ -96,21 +96,39 @@ app.get('/sessionLogin', (req, res) => {
 });
 
 
-app.get("/home", checkCookieMiddleware, (req, res) => {
+app.get("/home", (req, res) => {
+    var isLogged=false;
+    const sessionCookie = req.cookies.__session || '';
+
+    admin.auth().verifySessionCookie(
+        sessionCookie, true).then((decodedClaims) => {
+            req.decodedClaims = decodedClaims;
+           isLogged=true;
+           loadPost(isLogged,res);
+        })
+        .catch(error => {
+            console.log(error);
+            // Session cookie is unavailable or invalid. Force user to login.
+           isLogged=false;
+           loadPost(isLogged,res);
+        });       
+   
+});
+
+
+function loadPost(isLogged,res){
     var avatar = "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
 
 
     var posts = [];
     let postRef = db.ref("posts").limitToLast(50);
     postRef.once("value", snap => {
-
-
         snap.forEach(function (item) {
             
             var itemVal = item.val();
          
             if (itemVal.postCover == null) {
-                itemVal.postCover = "https://picsum.photos/1600/900"
+                itemVal.postCover = "https://picsum.photos/1600/900";
 
             }
             // console.log(item.val());
@@ -121,6 +139,7 @@ app.get("/home", checkCookieMiddleware, (req, res) => {
         // console.log(posts);
 
         res.render('homepage', {
+            isLogged:isLogged,
             profileImg: avatar,
             post: posts
         });
@@ -128,8 +147,7 @@ app.get("/home", checkCookieMiddleware, (req, res) => {
     });
 
 
-});
-
+}
 
 app.post("/posts/", function (req, res) {
     // console.log(req);

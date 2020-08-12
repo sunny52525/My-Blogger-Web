@@ -18,15 +18,11 @@
 </head>
 
 <body>
+    <% if(isLogged===true){%>
     <%- include("partials/navbar"); %>
-
-  
-
-
-    <script>
-        var x = "<%- post %>";
-        console.log(x); 
-    </script>
+    <%}else{%>
+        <%- include("partials/navbarlogout"); %>
+    <%}%>
     <div class="row">
         <% for(var i =post.length-1 ; i>0 ; i--){ %>
 
