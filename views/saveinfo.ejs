@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  <script src="https://kit.fontawesome.com/8d253625b6.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/alphardex/aqua.css@master/dist/aqua.min.css">
+    <link rel="stylesheet" href="/public/save-user-info/saveinfo.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+
+    <!-- AJAX -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+ 
+</head>
+
+<body>
+    <!-- profile pic
+        description
+        id 
+        name
+        username
+    -->
+
+
+    <div class="user-info-box">
+
+
+        <form class="login-form"  enctype="multipart/form-data" action="javascript:void(0);">
+
+
+            <h1 class="title">Just one more Step!</h1>
+
+            <input type="file" id="imgInp" name="profile" style="display:none" />
+            <img id="profile" style="border-radius:50%" src="/views/profile-placeholder.png" alt="Profile Picture"
+                height="100px" width="100px" />
+
+
+            <div class="form-input-material">
+                <input type="text" name="username" id="username" placeholder=" " autocomplete="off"
+                    class="form-control-material" required />
+                <label for="username">Username</label>  <i class="fa fa-exclamation-triangle error error-username" aria-hidden="true"></i>
+            </div>
+            <div class="form-input-material">
+                <input type="text" name="name" id="name" placeholder=" " autocomplete="off"
+                    class="form-control-material" required />
+                <label for="name">Name</label>  <i class="fa fa-exclamation-triangle error error-name" aria-hidden="true"></i>
+            </div>
+            <div class="form-input-material">
+                <input type="text" name="bio" id="bio" placeholder=" " autocomplete="off" class="form-control-material" />
+                <label for="bio">Bio</label>  <i class="fa fa-exclamation-triangle error error-bio" aria-hidden="true"></i>
+            </div>
+            <button type="submit" class="btn btn-primary btn-ghost" id="submitButton" onclick="sendFormData()">Login</button>
+            <div class="progress">
+                <div class="indeterminate"></div>
+              </div>
+              
+            <a href="signout">
+
+                <p class="diff-account">Sign in with different account!</p>
+
+            </a>
+        </form>
+
+
+    </div>
+    <script src="/public/save-user-info/saveinfo.js"></script>
+
+</body>
+
+</html>

@@ -7,18 +7,24 @@ const admin = require("firebase-admin");
 const app = express();
 const cookieParser = require("cookie-parser");
 const path = require('path');
-const {Storage} = require('@google-cloud/storage');
-
+const { Storage } = require('@google-cloud/storage');
+var multer = require('multer');
+var upload = multer();
 const appHost = require("https-localhost")();
 // intialise the express app
 const https = require('https');
+const firebaseAuth = require("firebase-auth");
 const fs = require('fs');
+
 var fileUpload = require('express-fileupload');
+
 app.set('view engine', 'ejs');
+
 
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(__dirname));
+// app.use(upload.array()); 
 app.use(cookieParser());
 var mime = require('mime');
 app.use(fileUpload({}));
@@ -36,7 +42,7 @@ admin.initializeApp({
 
     }
     ),
-    storageBucket:"gs://my-blogger-1b264.appspot.com",
+    storageBucket: "gs://my-blogger-1b264.appspot.com",
     databaseURL: "https://my-blogger-1b264.firebaseio.com",
     authDomain: "my-blogger-1b264.firebaseapp.com"
 
@@ -48,14 +54,13 @@ app.get("/posts/:postId", function (req, res) {
     // console.log(req.params);
     var postid = req.params.postId;
     console.log(postid);
-  
-    var regex=/^[^~.!@#$]+$/;
-    if(regex.test(postid))
-{
-   
-}else{
-   res.redirect('/posts/notfound')
-}
+
+    var regex = /^[^~.!@#$]+$/;
+    if (regex.test(postid)) {
+
+    } else {
+        res.redirect('/posts/notfound')
+    }
 
     var postRef = db.ref("posts").child(postid);
 
@@ -85,6 +90,147 @@ app.get("/posts/:postId", function (req, res) {
     );
 });
 
+app.get('/save', (req, res) => {
+
+    const sessionC = req.cookies.__session || '';
+    admin.auth().verifySessionCookie(sessionC, true).then((decodedClaims) => {
+
+        req.decodedClaims = decodedClaims;
+        let uid = decodedClaims.uid;
+        let userRef = db.ref("Users").child(uid);
+
+        userRef.once("value", snapshot => {
+            if (snapshot.exists()) {
+                console.log("exist");
+                res.redirect("/home");
+            } else {
+                res.render('saveinfo');
+            }
+        });
+    }).catch(err => {
+        res.redirect('/signin');
+    })
+
+
+});
+
+// var uploads=upload.fields([{photo:'avatar',maxCount:1},{username:}])
+app.post('/verify', upload.single('pic'), (req, res) => {
+
+    // console.log(req.files.file.data);
+    console.log(req.query.username);
+    console.log(req.query.name);
+    let photo;
+    if (req.files != null) {
+        photo = req.files.file.data;
+    } else {
+        photo = null;
+    }
+    let username = req.query.username;
+    let bio = req.query.bio;
+    var regex = /^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*$/;
+    let name = req.query.name;
+    if (username == "") {
+        res.send("username-empty");
+    } else if (name == "") {
+        res.send("name-empty");
+    } else if (!(regex.test(username))) {
+        res.send("username-invalid");
+    }
+    else {
+        console.log(username);
+
+        let userRef = db.ref("username").child(username);
+
+        userRef.once("value", snapshot => {
+            if (snapshot.exists()) {
+                console.log("exist");
+                res.send("username-error");
+            } else {
+
+
+                const cookie=req.cookies.__session||'';
+                admin.auth().verifySessionCookie(cookie ,true).then((decodedClaims)=>{
+                    req.decodedClaims=decodedClaims;
+                    let UID=decodedClaims.uid;
+
+                //Pphoto id name username
+                if (photo != null) {
+
+
+
+                    const options = {
+                        action: 'read',
+                        expires: '03-17-2025'
+                    };
+                    var data = photo;
+
+                    const bucket = admin.storage().bucket();
+                    var imageBuffer = new Uint8Array(data);
+                    var file = bucket.file(Date.now().toString());
+                    console.log(Date.now());
+                    file.save(imageBuffer, {
+                        metadata: { contentType: 'image/png' },
+                    },
+                        ((error) => {
+
+                            if (error) {
+                                console.log("++++++++++++++++++++++");
+                                console.log(error);
+                                res.send(error);
+                            }
+                            file.getSignedUrl(options)
+                                .then(results => {
+                                    const url = results[0];
+                                    let userData = {
+                                        Pphoto: url,
+                                        id: UID,
+                                        name: name,
+                                        username: username,
+                                        bio: bio
+
+                                    };
+                                    saveUser(userData);
+
+
+                                    console.log(`The signed url for "fi" is ${url}.`);
+                                });
+                        }));
+
+
+                } else {
+                    let userData = {
+                        Pphoto: "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/user.png?alt=media&token=51c974ff-e679-4ae8-bbd5-c91b0726c5b6",
+                        id: UID,
+                        name: name,
+                        username: username,
+                        bio: bio
+                    };
+                    saveUser(userData);
+                }
+
+                res.send("ok");
+                }).catch(err=>{
+                    res.status(401);
+                });
+
+
+
+
+            }
+        });
+
+    }
+
+});
+
+function saveUser(userData) {
+    var updates = {};
+    updates['/Users/' + userData.id] = userData;
+    updates['username/' + userData.username] = userData.username;
+    return db.ref().update(updates);
+
+}
 
 app.get('/sessionLogin', (req, res) => {
     const idToken = req.query.idToken;
@@ -96,27 +242,45 @@ app.get('/sessionLogin', (req, res) => {
 });
 
 
-app.get("/home", (req, res) => {
-    var isLogged=false;
-    const sessionCookie = req.cookies.__session || '';
 
+
+
+app.get("/home", (req, res) => {
+
+
+    var isLogged = false;
+    // let uid=req.decodedClaims.uid;
+    const sessionCookie = req.cookies.__session || '';
     admin.auth().verifySessionCookie(
         sessionCookie, true).then((decodedClaims) => {
             req.decodedClaims = decodedClaims;
-           isLogged=true;
-           loadPost(isLogged,res);
+            isLogged = true;
+            let uid = decodedClaims.uid;
+            console.log("uid is " + uid);
+            let userRef = db.ref("Users").child(uid);
+
+            userRef.once("value", snapshot => {
+                if (snapshot.exists()) {
+                    loadPost(isLogged, res);
+                } else {
+                    res.redirect('/save');
+                }
+            });
+
+
+
         })
         .catch(error => {
             console.log(error);
             // Session cookie is unavailable or invalid. Force user to login.
-           isLogged=false;
-           loadPost(isLogged,res);
-        });       
-   
+            isLogged = false;
+            loadPost(isLogged, res);
+        });
+
 });
 
 
-function loadPost(isLogged,res){
+function loadPost(isLogged, res) {
     var avatar = "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
 
 
@@ -124,9 +288,9 @@ function loadPost(isLogged,res){
     let postRef = db.ref("posts").limitToLast(50);
     postRef.once("value", snap => {
         snap.forEach(function (item) {
-            
+
             var itemVal = item.val();
-         
+
             if (itemVal.postCover == null) {
                 itemVal.postCover = "https://picsum.photos/1600/900";
 
@@ -139,7 +303,7 @@ function loadPost(isLogged,res){
         // console.log(posts);
 
         res.render('homepage', {
-            isLogged:isLogged,
+            isLogged: isLogged,
             profileImg: avatar,
             post: posts
         });
@@ -165,37 +329,37 @@ app.post("/posts/", function (req, res) {
 });
 
 
-app.post('/upload-image',(req,res)=>{
+app.post('/upload-image', (req, res) => {
     console.log(req.files.file.name);
-const options = {
-    action: 'read',
-    expires: '03-17-2025'
-};
-var data=req.files.file.data;
+    const options = {
+        action: 'read',
+        expires: '03-17-2025'
+    };
+    var data = req.files.file.data;
 
     const bucket = admin.storage().bucket();
     var imageBuffer = new Uint8Array(data);
     var file = bucket.file(Date.now().toString());
-   console.log(Date.now());
+    console.log(Date.now());
     file.save(imageBuffer, {
-              metadata: { contentType: 'image/png' },
-              }, 
-              ((error) => {
-                    
-              if (error) {
-                  console.log("++++++++++++++++++++++");
-                 console.log(error);
-                 res.send(error);
-              }
-           file.getSignedUrl(options)
-           .then(results => {
-               const url = results[0];
-                  
-      res.send({ 'location': url});
-               console.log(`The signed url for "fi" is ${url}.`);
-           });
-    }));
- 
+        metadata: { contentType: 'image/png' },
+    },
+        ((error) => {
+
+            if (error) {
+                console.log("++++++++++++++++++++++");
+                console.log(error);
+                res.send(error);
+            }
+            file.getSignedUrl(options)
+                .then(results => {
+                    const url = results[0];
+
+                    res.send({ 'location': url });
+                    console.log(`The signed url for "fi" is ${url}.`);
+                });
+        }));
+
 });
 
 
@@ -203,7 +367,7 @@ var data=req.files.file.data;
 
 
 
-app.get('/signout',(req,res)=>{
+app.get('/signout', (req, res) => {
     res.clearCookie('__session');
     res.redirect('/');
 });
@@ -214,19 +378,19 @@ app.get("/signin", function (req, res) {
     res.render('signin');
 });
 
-app.get('/newpost',checkCookieMiddleware,(req,res) =>{
+app.get('/newpost', checkCookieMiddleware, (req, res) => {
     var avatar = "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
 
-  res.render('newpost',{
-    profileImg: avatar
-  });
+    res.render('newpost', {
+        profileImg: avatar
+    });
 });
 
 
 app.get('/', checkCookieMiddleware, (req, res) => {
     let uid = req.decodedClaims.uid;
     console.log("uid is " + uid);
-    res.sendFile(__dirname + "/views/index.html")
+    res.sendFile(__dirname + "/views/index.html");
 });
 
 let port = process.env.PORT;
@@ -241,44 +405,44 @@ app.get('*', function (req, res) {
 
 
 
-app.post('/newpost',checkCookieMiddleware,(req,res)=>{
-    let postTitle=req.body.posttitle;
-    let postContent=req.body.postcontent;
+app.post('/newpost', checkCookieMiddleware, (req, res) => {
+    let postTitle = req.body.posttitle;
+    let postContent = req.body.postcontent;
     // console.log(req.body.posttitle);
     let uid = req.decodedClaims.uid;
-  
-    var userRef=db.ref("Users").child(uid);
+
+    var userRef = db.ref("Users").child(uid);
     var userData;
-    
-    let id= db.ref().child("posts").push().key;
-    userRef.on("value",snap=>{
-         userData=snap.val();
-        console.log(snap.val()); 
-        uploadPost(postTitle,postContent,uid ,userData,id);
+
+    let id = db.ref().child("posts").push().key;
+    userRef.on("value", snap => {
+        userData = snap.val();
+        console.log(snap.val());
+        uploadPost(postTitle, postContent, uid, userData, id);
     });
-   
+
     res.redirect('/home');
 });
 
 
 
 
-function uploadPost(postTitle,postContent,uid,userData,id){
+function uploadPost(postTitle, postContent, uid, userData, id) {
     //content id like_count nameOP time title username
-    
- 
-    var postData={
-        content:"<body>" + postContent.replace(/^ {4}/gm, '') +"</body>",
-        id:id,
-        like_count:0,
-        nameOP:userData.name,
+
+
+    var postData = {
+        content: "<body>" + postContent.replace(/^ {4}/gm, '') + "</body>",
+        id: id,
+        like_count: 0,
+        nameOP: userData.name,
         time: new Date().toLocaleString(),
-        title:postTitle.replace(/^ {4}/gm, ''),
-        username:userData.username
+        title: postTitle.replace(/^ {4}/gm, ''),
+        username: userData.username
     };
     var updates = {};
     updates['/posts/' + id] = postData;
-    updates['user-posts/' + uid + '/' +id]=postData;
+    updates['user-posts/' + uid + '/' + id] = postData;
     return db.ref().update(updates);
 
 }
@@ -288,18 +452,16 @@ function uploadPost(postTitle,postContent,uid,userData,id){
 
 
 
-function isValid(str){
-    return !/[~`!#$%\^&*+=\\[\]\\';,/{}|\\":<>\?]/g.test(str);
-   }
+
 
 
 https.createServer({
     key: fs.readFileSync('server.key'),
     cert: fs.readFileSync('server.cert')
-  }, app)
-  .listen(port, function () {
-    console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/');
-  });
+}, app)
+    .listen(port, function () {
+        console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/');
+    });
 
 
 // app.listen(port, function () {
@@ -337,6 +499,8 @@ function checkCookieMiddleware(req, res, next) {
     admin.auth().verifySessionCookie(
         sessionCookie, true).then((decodedClaims) => {
             req.decodedClaims = decodedClaims;
+           
+
             next();
         })
         .catch(error => {
