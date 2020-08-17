@@ -64,3 +64,13 @@ img{
     max-width: 100%;
     height: auto;
 }
+/* body{
+    word-break: break-all;
+}*/
+blockquote{
+    font-size: 0.89em;
+} 
+
+body{
+    word-wrap: break-word;
+}
