@@ -460,8 +460,8 @@ function uploadPost(postTitle, postContent, uid, userData, id) {
 //     key: fs.readFileSync('server.key'),
 //     cert: fs.readFileSync('server.cert')
 // }, app)
-//     .listen(port, function () {
-//         console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/');
+//     .listen(3001, function () {
+//         console.log('My Bloggerlistening on port 3000! Go to https://localhost:3001/');
 //     });
 
 

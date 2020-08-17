@@ -15,7 +15,7 @@ tinymce.init({
   file_picker_types: 'image',
   
   images_upload_url:"/upload-image",
-  toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link || image ",
+  toolbar: "insertfile undo redo | styleselect | bold italic blockquote | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link || image ",
   file_picker_callback: function (cb, value, meta) {
     var input = document.createElement('input');
     input.setAttribute('type', 'file');
