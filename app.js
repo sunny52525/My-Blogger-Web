@@ -438,7 +438,8 @@ function uploadPost(postTitle, postContent, uid, userData, id) {
         nameOP: userData.name,
         time: new Date().toLocaleString(),
         title: postTitle.replace(/^ {4}/gm, ''),
-        username: userData.username
+        username: userData.username,
+        userId:UID
     };
     var updates = {};
     updates['/posts/' + id] = postData;
