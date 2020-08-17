@@ -390,7 +390,7 @@ app.get('/newpost', checkCookieMiddleware, (req, res) => {
 app.get('/', checkCookieMiddleware, (req, res) => {
     let uid = req.decodedClaims.uid;
     console.log("uid is " + uid);
-    res.sendFile(__dirname + "/views/index.html");
+res.redirect("/home");
 });
 
 let port = process.env.PORT;
