@@ -283,7 +283,7 @@ app.get("/home", (req, res) => {
 function loadPost(isLogged, res) {
     var avatar = "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
 
-
+    
     var posts = [];
     let postRef = db.ref("posts").limitToLast(50);
     postRef.once("value", snap => {
@@ -295,7 +295,7 @@ function loadPost(isLogged, res) {
                 itemVal.postCover = "https://picsum.photos/1600/900";
 
             }
-            // console.log(item.val());
+            console.log(item.val());
             posts.push(itemVal);
 
         });
@@ -455,18 +455,18 @@ function uploadPost(postTitle, postContent, uid, userData, id) {
 
 
 
-// https.createServer({
-//     key: fs.readFileSync('server.key'),
-//     cert: fs.readFileSync('server.cert')
-// }, app)
-//     .listen(port, function () {
-//         console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/');
-//     });
+https.createServer({
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
+}, app)
+    .listen(port, function () {
+        console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/');
+    });
 
 
-app.listen(port, function () {
-    console.log("Server started on port" + port);
-});
+// app.listen(port, function () {
+//     console.log("Server started on port" + port);
+// });
 
 
 function setCookie(idToken, res) {
