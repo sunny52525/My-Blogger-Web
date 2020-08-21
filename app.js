@@ -295,7 +295,7 @@ function loadPost(isLogged, res) {
                 itemVal.postCover = "https://picsum.photos/1600/900";
 
             }
-            console.log(item.val());
+            // console.log(item.val());
             posts.push(itemVal);
 
         });

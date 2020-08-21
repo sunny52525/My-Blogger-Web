@@ -118,8 +118,7 @@
 }
 
 .posts{
-    padding-left: 50px;
-    width: 100%;
+    padding-left: 30px;
     padding-right: 30px;
 }
 .title-box{
@@ -161,4 +160,11 @@ body {
   
   .row{
       margin-right: 0em;
+  }
+
+  @media only screen and (max-width: 450px) {
+    .posts{
+        width: 100%;
+    }
+    
   }
