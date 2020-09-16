@@ -60,7 +60,7 @@ app.get("/posts/:postId", function (req, res) {
     if (regex.test(postid)) {
 
     } else {
-        res.redirect('/posts/notfound')
+        res.redirect('/posts/notfound');
     }
 
     var postRef = db.ref("posts").child(postid);
@@ -110,7 +110,7 @@ app.get('/save', (req, res) => {
         });
     }).catch(err => {
         res.redirect('/signin');
-    })
+    });
 
 
 });
