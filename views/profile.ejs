@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="/public/profile/profile.css">
+</head>
+
+<body>
+    <% if(isLogged===true){%>
+    <%- include("partials/navbar"); %>
+    <%}else{%>
+    <%- include("partials/navbarlogout"); %>
+    <%}%>
+    <div class="profile-header row">
+        <div class="col-md profile-header-div">
+            <img id="profile-image" src=<%=dp%> alt="">
+
+    </div>
+
+    <div class="col-md profile-details ">
+        <h2><%=userData.name%></h2>
+        <h5><%=userData.username%></h5>
+        <p><%=userData.bio%></p>
+    </div>
+
+    </div>
+<div>
+
+    <div class="profile-posts row " >
+     
+        <div class="name col-sm-12  ">
+            <p class=""><%=postData[0].nameOP%></p>
+            
+            <p><%=postData[0].time%></p>
+            
+            <p><%-postData[0].content%></p>
+            
+            
+        </div>
+        
+        <div class="everything col-sm-12">
+            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
+                industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and
+                scrambled it to make a type specimen book</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script src="/public/profile/profile.js"></script>
+<script src="/public/homepage/index.js"></script>
+
+</html>

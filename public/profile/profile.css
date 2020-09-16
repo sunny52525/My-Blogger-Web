@@ -1,0 +1,107 @@
+.profile-header{
+    
+    margin: 30px !important;
+    padding:20px;
+    height: max-content;
+background-color: aqua;
+}
+
+.profile-details{
+    margin: 20px 10px 20px auto;
+    text-align: end;
+    line-height: 1rem;
+}
+#profile-image{
+    height: 200px;
+    width: auto;
+    border-radius: 40%;
+}
+.profile-posts{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+body{
+    word-wrap: break-word;
+}
+.name{
+    padding-left: 500px;
+    padding-right: 400px;
+    display: block !important; 
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;    
+    width: 500px;
+    height: 400px;
+}
+.everything {
+    clear: both;
+    padding-left: 500px;
+    padding-right: 400px;
+    overflow: hidden;  
+    /* display: flex;   */
+    width: 100%;
+    height: 60px;
+    filter: blur(3px) grayscale(100%);
+    opacity: 0.6
+  }
+@media only screen and (max-width: 764px  ) {
+    .profile-details{
+       text-align: center;
+    }
+    .profile-header-div{
+        display: flex;
+    justify-content: center;
+    }
+    #profile-image{
+        width: auto !important;
+        height: 150px !important;
+    }
+    .name{
+        width: 100%;
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+        
+    }
+    .everything{
+        width: 100%;
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+        
+    }
+    .profile-posts{
+        width: 100%;
+    }
+    img{
+        width: 100% !important;
+        height: auto;
+    }
+  }
+  @media only screen and (max-width: 1240px  ) {
+   
+    .name{
+        padding-left: 150px !important;
+        padding-right: 150px !important;
+        
+    }
+    .everything{
+        padding-left: 150px !important;
+        padding-right: 150px !important;
+        
+    }
+ 
+  }
+  @media only screen and (max-width: 620px  ) {
+   
+    .name{
+        padding-left: 50px !important;
+        padding-right: 50px !important;
+        
+    }
+    .everything{
+        padding-left: 50px !important;
+        padding-right: 50px !important;
+        
+    }
+ 
+  }

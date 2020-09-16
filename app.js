@@ -47,6 +47,7 @@ admin.initializeApp({
     authDomain: "my-blogger-1b264.firebaseapp.com"
 
 });
+var avatar = "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
 
 var db = admin.database();
 // var database = firebase.database();
@@ -149,68 +150,67 @@ app.post('/verify', upload.single('pic'), (req, res) => {
             } else {
 
 
-                const cookie=req.cookies.__session||'';
-                admin.auth().verifySessionCookie(cookie ,true).then((decodedClaims)=>{
-                    req.decodedClaims=decodedClaims;
-                    let UID=decodedClaims.uid;
+                const cookie = req.cookies.__session || '';
+                admin.auth().verifySessionCookie(cookie, true).then((decodedClaims) => {
+                    req.decodedClaims = decodedClaims;
+                    let UID = decodedClaims.uid;
 
-                //Pphoto id name username
-                if (photo != null) {
-
-
-
-                    const options = {
-                        action: 'read',
-                        expires: '03-17-2025'
-                    };
-                    var data = photo;
-
-                    const bucket = admin.storage().bucket();
-                    var imageBuffer = new Uint8Array(data);
-                    var file = bucket.file(Date.now().toString());
-                    console.log(Date.now());
-                    file.save(imageBuffer, {
-                        metadata: { contentType: 'image/png' },
-                    },
-                        ((error) => {
-
-                            if (error) {
-                                console.log("++++++++++++++++++++++");
-                                console.log(error);
-                                res.send(error);
-                            }
-                            file.getSignedUrl(options)
-                                .then(results => {
-                                    const url = results[0];
-                                    let userData = {
-                                        Pphoto: url,
-                                        id: UID,
-                                        name: name,
-                                        username: username,
-                                        bio: bio
-
-                                    };
-                                    saveUser(userData);
+                    //Pphoto id name username
+                    if (photo != null) {
 
 
-                                    console.log(`The signed url for "fi" is ${url}.`);
-                                });
-                        }));
+
+                        const options = {
+                            action: 'read',
+                            expires: '03-17-2025'
+                        };
+                        var data = photo;
+
+                        const bucket = admin.storage().bucket();
+                        var imageBuffer = new Uint8Array(data);
+                        var file = bucket.file(Date.now().toString());
+                        console.log(Date.now());
+                        file.save(imageBuffer, {
+                            metadata: { contentType: 'image/png' },
+                        },
+                            ((error) => {
+
+                                if (error) {
+                                    console.log("++++++++++++++++++++++");
+                                    console.log(error);
+                                    res.send(error);
+                                }
+                                file.getSignedUrl(options)
+                                    .then(results => {
+                                        const url = results[0];
+                                        let userData = {
+                                            Pphoto: url,
+                                            id: UID,
+                                            name: name,
+                                            username: username,
+                                            bio: bio
+
+                                        };
+                                        saveUser(userData,res);
 
 
-                } else {
-                    let userData = {
-                        Pphoto: "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/user.png?alt=media&token=51c974ff-e679-4ae8-bbd5-c91b0726c5b6",
-                        id: UID,
-                        name: name,
-                        username: username,
-                        bio: bio
-                    };
-                    saveUser(userData);
-                }
+                                        console.log(`The signed url for "fi" is ${url}.`);
+                                    });
+                            }));
 
-                res.send("ok");
-                }).catch(err=>{
+
+                    } else {
+                        let userData = {
+                            Pphoto: "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/user.png?alt=media&token=51c974ff-e679-4ae8-bbd5-c91b0726c5b6",
+                            id: UID,
+                            name: name,
+                            username: username,
+                            bio: bio
+                        };
+                        saveUser(userData,res);
+                    }
+
+                }).catch(err => {
                     res.status(401);
                 });
 
@@ -224,11 +224,14 @@ app.post('/verify', upload.single('pic'), (req, res) => {
 
 });
 
-function saveUser(userData) {
+function saveUser(userData,res) {
     var updates = {};
     updates['/Users/' + userData.id] = userData;
-    updates['username/' + userData.username] = userData.username;
+    updates['username/' + userData.username] = userData.id;
+    
+    res.send("ok");
     return db.ref().update(updates);
+    
 
 }
 
@@ -261,7 +264,7 @@ app.get("/home", (req, res) => {
 
             userRef.once("value", snapshot => {
                 if (snapshot.exists()) {
-                    loadPost(isLogged, res);
+                    loadPost(isLogged, res,snapshot.val().Pphoto);
                 } else {
                     res.redirect('/save');
                 }
@@ -280,10 +283,10 @@ app.get("/home", (req, res) => {
 });
 
 
-function loadPost(isLogged, res) {
+function loadPost(isLogged, res,profile) {
     var avatar = "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
 
-    
+
     var posts = [];
     let postRef = db.ref("posts").limitToLast(50);
     postRef.once("value", snap => {
@@ -301,10 +304,13 @@ function loadPost(isLogged, res) {
         });
 
         // console.log(posts);
-
+        let profileImg=avatar;
+        if(profile!=null){
+            profileImg=profile;
+        }
         res.render('homepage', {
             isLogged: isLogged,
-            profileImg: avatar,
+            profileImg: profileImg,
             post: posts
         });
 
@@ -379,7 +385,6 @@ app.get("/signin", function (req, res) {
 });
 
 app.get('/newpost', checkCookieMiddleware, (req, res) => {
-    var avatar = "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
 
     res.render('newpost', {
         profileImg: avatar
@@ -390,18 +395,13 @@ app.get('/newpost', checkCookieMiddleware, (req, res) => {
 app.get('/', checkCookieMiddleware, (req, res) => {
     let uid = req.decodedClaims.uid;
     console.log("uid is " + uid);
-res.redirect("/home");
+    res.redirect("/home");
 });
 
 let port = process.env.PORT;
 if (port == null || port == "") {
     port = 3000;
 }
-app.get('*', function (req, res) {
-    res.sendFile(__dirname + "/views/404.html");
-});
-
-
 
 
 
@@ -426,10 +426,79 @@ app.post('/newpost', checkCookieMiddleware, (req, res) => {
 
 
 
+app.get('/profile/:id', (req, res) => {
+
+    var isLogged = false;
+    const sessisonCookie = req.cookies.__session || '';
+    admin.auth().verifySessionCookie(sessisonCookie, true).then((decodedClaims) => {
+
+        req.decodedClaims = decodedClaims;
+        isLogged = true;
+        let uid = decodedClaims.uid;
+        let isSelf=false;
+        if (req.params.id == "me") {
+            isSelf=true;
+            loadProfile(isLogged,uid,isSelf,res);
+        }else{ 
+            let userref=db.ref("username").child(req.params.id);
+            userref.once("value",snapshot=>{
+                if(snapshot.exists()){
+                   console.log(snapshot.val());
+                   loadProfile(isLogged,snapshot.val(),isSelf,res);
+                }else{
+                  res.redirect("/404");
+                }
+            });
+
+
+        }
+
+    });
+
+    // console.log(uid);
+  
+});
+
+function loadProfile(isLogged,uid,isSelf,res){
+
+        let userRef=db.ref("Users").child(uid);
+        userRef.once("value",snapshot=>{
+            if(snapshot.exists()){
+                let userData=snapshot.val();
+                console.log(userData);
+                let posts=[];
+                let postRef=db.ref("user-posts").child(uid).limitToLast(30);
+                postRef.once("value",snap=>{
+                    snap.forEach((item)=>{
+                        let itemVal=item.val();
+
+                        posts.push(itemVal);
+
+                    });
+                    console.log(posts);
+                    let profilePic=avatar;
+                    if(userData.Pphoto!=null){
+                        profilePic=userData.Pphoto;
+                    }
+                    res.render('profile',{
+                        profileImg:avatar,
+                        userData:userData,
+                        postData:posts,
+                        isLogged:isLogged,
+                        isSelf:isSelf,
+                        dp:profilePic
+                    });
+                });
+
+              
+            }else{
+                res.redirect("/404");
+            }
+        });
+    
+}
 
 function uploadPost(postTitle, postContent, uid, userData, id) {
-    //content id like_count nameOP time title username
-
 
     var postData = {
         content: "<body>" + postContent.replace(/^ {4}/gm, '') + "</body>",
@@ -439,7 +508,7 @@ function uploadPost(postTitle, postContent, uid, userData, id) {
         time: new Date().toLocaleString(),
         title: postTitle.replace(/^ {4}/gm, ''),
         username: userData.username,
-        userId:uid
+        userId: uid
     };
     var updates = {};
     updates['/posts/' + id] = postData;
@@ -456,18 +525,26 @@ function uploadPost(postTitle, postContent, uid, userData, id) {
 
 
 
-// https.createServer({
-//     key: fs.readFileSync('server.key'),
-//     cert: fs.readFileSync('server.cert')
-// }, app)
-//     .listen(3001, function () {
-//         console.log('My Bloggerlistening on port 3000! Go to https://localhost:3001/');
-//     });
-
-
-app.listen(port, function () {
-    console.log("Server started on port" + port);
+app.get('*', function (req, res) {
+    res.sendFile(__dirname + "/views/404.html");
 });
+
+
+
+
+
+https.createServer({
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
+}, app)
+    .listen(3000, function () {
+        console.log('My Bloggerlistening on port 3000! Go to https://localhost:3000/');
+    });
+
+
+// app.listen(port, function () {
+//     console.log("Server started on port" + port);
+// });
 
 
 function setCookie(idToken, res) {
@@ -500,7 +577,7 @@ function checkCookieMiddleware(req, res, next) {
     admin.auth().verifySessionCookie(
         sessionCookie, true).then((decodedClaims) => {
             req.decodedClaims = decodedClaims;
-           
+
 
             next();
         })
