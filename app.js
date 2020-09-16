@@ -191,7 +191,7 @@ app.post('/verify', upload.single('pic'), (req, res) => {
                                             bio: bio
 
                                         };
-                                        saveUser(userData,res);
+                                        saveUser(userData, res);
 
 
                                         console.log(`The signed url for "fi" is ${url}.`);
@@ -207,7 +207,7 @@ app.post('/verify', upload.single('pic'), (req, res) => {
                             username: username,
                             bio: bio
                         };
-                        saveUser(userData,res);
+                        saveUser(userData, res);
                     }
 
                 }).catch(err => {
@@ -224,14 +224,14 @@ app.post('/verify', upload.single('pic'), (req, res) => {
 
 });
 
-function saveUser(userData,res) {
+function saveUser(userData, res) {
     var updates = {};
     updates['/Users/' + userData.id] = userData;
     updates['username/' + userData.username] = userData.id;
-    
+
     res.send("ok");
     return db.ref().update(updates);
-    
+
 
 }
 
@@ -264,7 +264,7 @@ app.get("/home", (req, res) => {
 
             userRef.once("value", snapshot => {
                 if (snapshot.exists()) {
-                    loadPost(isLogged, res,snapshot.val().Pphoto);
+                    loadPost(isLogged, res, snapshot.val().Pphoto);
                 } else {
                     res.redirect('/save');
                 }
@@ -283,7 +283,7 @@ app.get("/home", (req, res) => {
 });
 
 
-function loadPost(isLogged, res,profile) {
+function loadPost(isLogged, res, profile) {
     var avatar = "https://firebasestorage.googleapis.com/v0/b/my-blogger-1b264.appspot.com/o/avatar.png?alt=media&token=d875c7d3-fccc-41b8-87ba-7f5e80c8b873";
 
 
@@ -304,9 +304,9 @@ function loadPost(isLogged, res,profile) {
         });
 
         // console.log(posts);
-        let profileImg=avatar;
-        if(profile!=null){
-            profileImg=profile;
+        let profileImg = avatar;
+        if (profile != null) {
+            profileImg = profile;
         }
         res.render('homepage', {
             isLogged: isLogged,
@@ -435,67 +435,83 @@ app.get('/profile/:id', (req, res) => {
         req.decodedClaims = decodedClaims;
         isLogged = true;
         let uid = decodedClaims.uid;
-        let isSelf=false;
+        let isSelf = false;
         if (req.params.id == "me") {
-            isSelf=true;
-            loadProfile(isLogged,uid,isSelf,res);
-        }else{ 
-            let userref=db.ref("username").child(req.params.id);
-            userref.once("value",snapshot=>{
-                if(snapshot.exists()){
-                   console.log(snapshot.val());
-                   loadProfile(isLogged,snapshot.val(),isSelf,res);
-                }else{
-                  res.redirect("/404");
+            isSelf = true;
+            loadProfile(isLogged, uid, isSelf, res);
+        } else {
+            let userref = db.ref("username").child(req.params.id);
+            userref.once("value", snapshot => {
+                if (snapshot.exists()) {
+                    console.log(snapshot.val());
+                    loadProfile(isLogged, snapshot.val(), isSelf, res);
+                } else {
+                    res.redirect("/404");
                 }
             });
 
 
         }
 
+    }).catch(error => {
+
+        if (req.params.id == "me")
+            res.redirect('/signin');
+        else{
+            
+            let userref = db.ref("username").child(req.params.id);
+            userref.once("value", snapshot => {
+                if (snapshot.exists()) {
+                    console.log(snapshot.val());
+                    loadProfile(isLogged, snapshot.val(), false, res);
+                } else {
+                    res.redirect("/404");
+                }
+            });
+        }
     });
 
     // console.log(uid);
-  
+
 });
 
-function loadProfile(isLogged,uid,isSelf,res){
+function loadProfile(isLogged, uid, isSelf, res) {
 
-        let userRef=db.ref("Users").child(uid);
-        userRef.once("value",snapshot=>{
-            if(snapshot.exists()){
-                let userData=snapshot.val();
-                console.log(userData);
-                let posts=[];
-                let postRef=db.ref("user-posts").child(uid).limitToLast(30);
-                postRef.once("value",snap=>{
-                    snap.forEach((item)=>{
-                        let itemVal=item.val();
+    let userRef = db.ref("Users").child(uid);
+    userRef.once("value", snapshot => {
+        if (snapshot.exists()) {
+            let userData = snapshot.val();
+            console.log(userData);
+            let posts = [];
+            let postRef = db.ref("user-posts").child(uid).limitToLast(30);
+            postRef.once("value", snap => {
+                snap.forEach((item) => {
+                    let itemVal = item.val();
 
-                        posts.push(itemVal);
+                    posts.push(itemVal);
 
-                    });
-                    console.log(posts);
-                    let profilePic=avatar;
-                    if(userData.Pphoto!=null){
-                        profilePic=userData.Pphoto;
-                    }
-                    res.render('profile',{
-                        profileImg:avatar,
-                        userData:userData,
-                        postData:posts,
-                        isLogged:isLogged,
-                        isSelf:isSelf,
-                        dp:profilePic
-                    });
                 });
+                console.log(posts);
+                let profilePic = avatar;
+                if (userData.Pphoto != null) {
+                    profilePic = userData.Pphoto;
+                }
+                res.render('profile', {
+                    profileImg: avatar,
+                    userData: userData,
+                    postData: posts,
+                    isLogged: isLogged,
+                    isSelf: isSelf,
+                    dp: profilePic
+                });
+            });
 
-              
-            }else{
-                res.redirect("/404");
-            }
-        });
-    
+
+        } else {
+            res.redirect("/404");
+        }
+    });
+
 }
 
 function uploadPost(postTitle, postContent, uid, userData, id) {

@@ -6,7 +6,7 @@
     <%- include("partials/fonts_boot"); -%>
 
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
- 
+
 
 
     <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
@@ -25,40 +25,41 @@
     <% if(isLogged===true){%>
     <%- include("partials/navbar"); %>
     <%}else{%>
-        <%- include("partials/navbarlogout"); %>
+    <%- include("partials/navbarlogout"); %>
     <%}%>
 
     
     <div class="row">
         <% for(var i =post.length-1 ; i>=0 ; i--){ %>
 
-        <div class="posts flex-sm-column">
-            <div class="flex justify-center items-center h-screen title-box">
-                <div class="max-w-sm rounded overflow-hidden shadow-lg"  onclick="location.href='posts/<%=post[i].id%>';">
+    <div class="posts flex-sm-column">
+        <div class="flex justify-center items-center h-screen title-box">
+            <div class="max-w-sm rounded overflow-hidden shadow-lg">
 
-                        <img class="w-full" src=<%=post[i].postCover%> >
-                     
-                      
-                      <div>
+                <img class="w-full" onclick="location.href='posts/<%=post[i].id%>';" src=<%=post[i].postCover%>>
+
+
+                <div>
                     <div class="px-6 ok py-4">
-                        <a href=<%= "posts/" + post[i].id%> >
+                        <a href=<%= "posts/" + post[i].id%>>
                             <div class="font-bold text-xl mb-2"><%=post[i].title%></div>
                         </a>
                         <%-post[i].content + "......"%>
 
                     </div>
                     <div class="px-6 notOk py-4">
-                        <span
+                        <span onclick="location.href='/profile/<%=post[i].username%>';"
                             class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">
-                           <%=post[i].username%>
+                            <%=post[i].username%>
+
                         </span>
                     </div>
                 </div>
-                </div>
             </div>
         </div>
+    </div>
 
-        <%        } %>
+    <%        } %>
     </div>
 
     <script src="/public/homepage/index.js"></script>
