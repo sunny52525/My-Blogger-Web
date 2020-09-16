@@ -1,14 +1,16 @@
 .profile-header{
     
-    margin: 30px !important;
+    margin: 10px !important;
     padding:20px;
+
     height: max-content;
-background-color: aqua;
+    background-color: #45474c;
 }
 
 .profile-details{
     margin: 20px 10px 20px auto;
     text-align: end;
+    color: #ccc ;
     line-height: 1rem;
 }
 #profile-image{
@@ -18,21 +20,38 @@ background-color: aqua;
 }
 .profile-posts{
     width: 100%;
+    border: 1px solid #ccc!important;
     display: flex;
     justify-content: center;
 }
 body{
     word-wrap: break-word;
 }
+
 .name{
     padding-left: 500px;
     padding-right: 400px;
+    margin-bottom: 30px;
+    
+    padding-bottom: 30px;
+
     display: block !important; 
     flex-direction: column;
     justify-content: space-between;
     overflow: hidden;    
     width: 500px;
-    height: 400px;
+
+    max-height: 400px;
+}
+.name-op{
+    font-size: 1.5rem;
+    margin-bottom: 0;
+
+        
+}
+
+.time{
+    font-size: 0.6rem;
 }
 .everything {
     clear: both;
